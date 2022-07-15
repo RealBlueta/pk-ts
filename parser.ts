@@ -83,11 +83,11 @@ export class Parser {
             case TokenType.LeftParen: {
                 this.eat(); // eat left paren
                 const paren_block = new BlockNode;
-                while (!this.eof() && this.current_token().type !== TokenType.RightParen) {
+                while (!this.is_eof() && !this.is_right_paren()) {
                     paren_block.push_node(this.parse_node());
                     this.eat();
                 }
-                if (this.eof() || this.current_token().type !== TokenType.RightParen) 
+                if (this.is_eof() || !this.is_right_paren()) 
                     throw new Error('Expected ) but got ' + (this.current_token() || 'EOF'));
                 return paren_block;
             } 
@@ -100,7 +100,20 @@ export class Parser {
                 throw todo(`unexpected (token::${token.type} -> { ${token.value} })`);
             } 
         }
-        return new Node;
+        throw new Error('unexpected AST???');
+    }
+
+    // is
+    private is_eof(): boolean {
+        return !this.current_token();
+    }
+
+    private is_left_paren(): boolean {
+        return this.current_token() && this.current_token().type == TokenType.LeftParen;
+    }
+
+    private is_right_paren(): boolean {
+        return this.current_token() && this.current_token().type == TokenType.RightParen;
     }
 
     // Other
@@ -110,10 +123,6 @@ export class Parser {
 
     private peek(): Token {
         return this.tokens[this.cursor + 1];
-    }
-
-    private eof(): boolean {
-        return !this.current_token();
     }
 
     private eat(): void {
