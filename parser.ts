@@ -73,7 +73,8 @@ export class Parser {
         const op = this.get_token().value;
         this.eat(); // eat op tok
 
-        const lhs = this.parse_expression();
+        const lhs = this.body.pop_node();
+        console.log(lhs)
         if (!lhs) {
             todo('implement left hand operator');
         }
@@ -81,7 +82,7 @@ export class Parser {
         const rhs = this.parse_expression();
         if (!rhs) throw new Error('invalid binary operation, missing right hand side');
 
-        return new BinaryNode(lhs, rhs, op);
+        return new BinaryNode(lhs!, rhs, op);
     }
 
     private parse_left_paren(): Node {
@@ -99,11 +100,14 @@ export class Parser {
     }
 
     private parse_right_paren(): Node {
+        console.log(this.body);
         throw new Error('Unexpected Right Paren');
     }
 
     private parse_expression(): Node {
         const token = this.get_token();
+        if (!token)
+            throw new Error('eof?');
         switch (token.type) {
             case TokenType.Integer: return this.parse_integer();
             case TokenType.String: return this.parse_integer();
