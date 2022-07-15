@@ -11,7 +11,8 @@ export enum TokenType {
     String = 'string',
     Identifier = 'identifier',
     Operator = 'operator',
-    Parenthesis = 'parenthesis'
+    LeftParen = 'left_paren',
+    RightParen = 'right_paren'
 }
 
 export class Token {
@@ -21,7 +22,7 @@ export class Token {
 
 // Todo
 function todo(...args: unknown[]) {
-    console.assert(false, args[0]);
+    console.assert(false, 'Lexer:', ...args);
     Deno.exit(1);
 }
 
@@ -31,6 +32,8 @@ const NUMBERS: string[] = '0123456789'.split('');
 const ALPHABET: string[] = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz_'.split(''); 
 const OPERATORS: string[] = '+-/*%'.split('');
 const STRING_LITERALS: string[] = '\'"'.split('');
+const PARENTHESIS: string[] = '()'.split('');
+const BRACKETS: string[] = '{}[]'.split('');
 
 // Lexer
 export class Lexer {
@@ -64,11 +67,24 @@ export class Lexer {
     }
 
     private lex_identifier(): void {
-        todo('identifier');
+        todo('implemenet identifier');
     }
 
     private lex_string(): void {
-        todo('string');
+        todo('implemenet string');
+    }
+
+    private lex_parens(): void {
+        const paren = this.current_char();
+        let type: TokenType;
+        if (paren == '(') type = TokenType.LeftParen; 
+        if (paren == ')') type = TokenType.RightParen; 
+        this.tokens.push(new Token(type!, this.location.clone()));
+        this.increment();
+    }
+
+    private lex_brackets(): void {
+        todo('implemenet brackets');
     }
 
     // Other
@@ -100,7 +116,9 @@ export class Lexer {
             if (NUMBERS.includes(this.current_char())) { this.lex_numbers(); continue; }
             if (ALPHABET.includes(this.current_char())) { this.lex_identifier(); continue; }
             if (STRING_LITERALS.includes(this.current_char())) { this.lex_string(); continue; }
-            todo(this.current_char());
+            if (PARENTHESIS.includes(this.current_char())) { this.lex_parens(); continue; }
+            if (BRACKETS.includes(this.current_char())) { this.lex_brackets(); continue; }
+            todo('implement', this.current_char());
             this.increment();
         }
         return this.tokens;

@@ -6,6 +6,7 @@ export class Node {
 }
 
 export class BlockNode extends Node {
+    private type = 'block_node';
     public nodes: Node[];
     constructor() {
         super();
@@ -22,12 +23,14 @@ export class BlockNode extends Node {
 }
 
 export class BinaryNode extends Node {
+    private type = 'binary_node';
     constructor(public lhs: Node, public rhs: Node, public op: string) {
         super();
     }
 }
 
 export class LiteralNode extends Node {
+    private type = 'literal_node';
     constructor(public value: string | number) {
         super();
     }
@@ -35,7 +38,7 @@ export class LiteralNode extends Node {
 
 // Todo
 function todo(...args: unknown[]) {
-    console.assert(false, ...args);
+    console.assert(false, 'Parser', ...args);
     Deno.exit(1);
 }
 
@@ -47,18 +50,16 @@ export class Parser {
     private cursor: number = 0;
 
     // Parse Function
-    private advance_parse() {
+    private parse_node(): Node {
         const token = this.current_token();
         switch (token.type) {
             case TokenType.Integer: {
-                this.body.push_node(new LiteralNode(token.value));
-                this.cursor += 1;
-            } break;
+                return new LiteralNode(token.value);
+            } 
 
             case TokenType.String: {
-                this.body.push_node(new LiteralNode(token.value));
-                this.cursor += 1;
-            } break;
+                return new LiteralNode(token.value);
+            } 
 
             case TokenType.Identifier: {
                 todo('ast identifier');
@@ -66,29 +67,40 @@ export class Parser {
 
             case TokenType.Operator: {
                 const op = token.value;
-                this.cursor += 1; // consume op
+                this.eat(); // consume op
 
-                const lhs = this.body.pop_node();
+                const lhs = this.parse_node();
                 if (!lhs) {
                     todo('implement left hand operator');
                 }
 
-                this.advance_parse();
-
-                const rhs = this.body.pop_node();
+                const rhs = this.parse_node();
                 if (!rhs) throw new Error('invalid binary operation, missing right hand side');
 
-                this.body.push_node(new BinaryNode(lhs!, rhs, op));
-            } break;
+                return new BinaryNode(lhs, rhs, op);
+            } 
 
-            case TokenType.Parenthesis: {
-                todo('ast parens');
-            } break;
+            case TokenType.LeftParen: {
+                this.eat(); // eat left paren
+                const paren_block = new BlockNode;
+                while (!this.eof() && this.current_token().type !== TokenType.RightParen) {
+                    paren_block.push_node(this.parse_node());
+                    this.eat();
+                }
+                if (this.eof() || this.current_token().type !== TokenType.RightParen) 
+                    throw new Error('Expected ) but got ' + (this.current_token() || 'EOF'));
+                return paren_block;
+            } 
+
+            case TokenType.RightParen: {
+                throw new Error('Unexpected Right Paren');
+            } 
 
             default: {
-                todo(`unexpected (token::${token.type} -> { ${token.value} })`);
-            } break;
+                throw todo(`unexpected (token::${token.type} -> { ${token.value} })`);
+            } 
         }
+        return new Node;
     }
 
     // Other
@@ -100,6 +112,14 @@ export class Parser {
         return this.tokens[this.cursor + 1];
     }
 
+    private eof(): boolean {
+        return !this.current_token();
+    }
+
+    private eat(): void {
+        this.cursor += 1; 
+    }
+
     static parse(tokens: Token[]): BlockNode {
         return new Parser().parse(tokens);
     }
@@ -109,7 +129,8 @@ export class Parser {
         this.body = new BlockNode;
         this.cursor = 0;
         while (this.cursor < this.tokens.length) {
-            this.advance_parse();
+            this.body.push_node(this.parse_node());
+            this.eat();
         }
         return this.body;
     }

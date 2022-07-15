@@ -1,13 +1,38 @@
 {
+    "type": "block_node",
     "nodes": [
         {
-            "lhs": {
-                "value": 11
-            },
-            "rhs": {
-                "value": 13
-            },
-            "op": "+"
+            "type": "block_node",
+            "nodes": [
+                {
+                    "type": "literal_node",
+                    "value": 1
+                },
+                {
+                    "type": "binary_node",
+                    "lhs": {
+                        "type": "literal_node",
+                        "value": 5
+                    },
+                    "rhs": {
+                        "type": "literal_node",
+                        "value": 5
+                    },
+                    "op": "+"
+                },
+                {
+                    "type": "binary_node",
+                    "lhs": {
+                        "type": "literal_node",
+                        "value": 2
+                    },
+                    "rhs": {
+                        "type": "literal_node",
+                        "value": 2
+                    },
+                    "op": "/"
+                }
+            ]
         }
     ]
 }
