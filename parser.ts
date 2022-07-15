@@ -51,7 +51,7 @@ export class Parser {
 
     // Parse Function
     private parse_node(): Node {
-        const token = this.current_token();
+        const token = this.get_token();
         switch (token.type) {
             case TokenType.Integer: {
                 return new LiteralNode(token.value);
@@ -88,7 +88,7 @@ export class Parser {
                     this.eat();
                 }
                 if (this.is_eof() || !this.is_right_paren()) 
-                    throw new Error('Expected ) but got ' + (this.current_token() || 'EOF'));
+                    throw new Error('Expected ) but got ' + (this.get_token() || 'EOF'));
                 return paren_block;
             } 
 
@@ -105,24 +105,20 @@ export class Parser {
 
     // is
     private is_eof(): boolean {
-        return !this.current_token();
+        return !this.get_token();
     }
 
     private is_left_paren(): boolean {
-        return this.current_token() && this.current_token().type == TokenType.LeftParen;
+        return this.get_token() && this.get_token().type == TokenType.LeftParen;
     }
 
     private is_right_paren(): boolean {
-        return this.current_token() && this.current_token().type == TokenType.RightParen;
+        return this.get_token() && this.get_token().type == TokenType.RightParen;
     }
 
     // Other
-    private current_token(): Token {
-        return this.tokens[this.cursor];
-    }
-
-    private peek(): Token {
-        return this.tokens[this.cursor + 1];
+    private get_token(offset = 0): Token {
+        return this.tokens[this.cursor + offset];
     }
 
     private eat(): void {
