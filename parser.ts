@@ -36,6 +36,13 @@ export class LiteralNode extends Node {
     }
 }
 
+export class GroupedExpressionNode extends Node {
+    private type = 'grouped_expression_node';
+    constructor(public expression?: Node) {
+        super();
+    }
+}
+
 // Todo
 function todo(...args: unknown[]) {
     console.assert(false, 'Parser', ...args);
@@ -50,57 +57,62 @@ export class Parser {
     private cursor: number = 0;
 
     // Parse Function
-    private parse_node(): Node {
+    private parse_integer(): Node {
+        return new LiteralNode(this.get_token().value);
+    }
+
+    private parse_string(): Node {
+        return new LiteralNode(this.get_token().value);
+    }
+
+    private parse_identifier(): Node {
+        throw todo('ast identifier');
+    }
+
+    private parse_operator(): Node {
+        const op = this.get_token().value;
+        this.eat(); // eat op tok
+
+        const lhs = this.parse_expression();
+        if (!lhs) {
+            todo('implement left hand operator');
+        }
+
+        const rhs = this.parse_expression();
+        if (!rhs) throw new Error('invalid binary operation, missing right hand side');
+
+        return new BinaryNode(lhs, rhs, op);
+    }
+
+    private parse_left_paren(): Node {
+        this.eat(); // eat left paren tok
+        const paren_expr = new GroupedExpressionNode;
+        const block = new BlockNode;
+        while (!this.is_eof() && !this.is_right_paren()) {
+            block.push_node(this.parse_expression());
+            this.eat();
+        }
+        if (this.is_eof() || !this.is_right_paren()) 
+            throw new Error('Expected ) but got ' + (this.get_token() || 'EOF'));
+        paren_expr.expression = block;
+        return paren_expr;
+    }
+
+    private parse_right_paren(): Node {
+        throw new Error('Unexpected Right Paren');
+    }
+
+    private parse_expression(): Node {
         const token = this.get_token();
         switch (token.type) {
-            case TokenType.Integer: {
-                return new LiteralNode(token.value);
-            } 
-
-            case TokenType.String: {
-                return new LiteralNode(token.value);
-            } 
-
-            case TokenType.Identifier: {
-                todo('ast identifier');
-            } break;
-
-            case TokenType.Operator: {
-                const op = token.value;
-                this.eat(); // consume op
-
-                const lhs = this.parse_node();
-                if (!lhs) {
-                    todo('implement left hand operator');
-                }
-
-                const rhs = this.parse_node();
-                if (!rhs) throw new Error('invalid binary operation, missing right hand side');
-
-                return new BinaryNode(lhs, rhs, op);
-            } 
-
-            case TokenType.LeftParen: {
-                this.eat(); // eat left paren
-                const paren_block = new BlockNode;
-                while (!this.is_eof() && !this.is_right_paren()) {
-                    paren_block.push_node(this.parse_node());
-                    this.eat();
-                }
-                if (this.is_eof() || !this.is_right_paren()) 
-                    throw new Error('Expected ) but got ' + (this.get_token() || 'EOF'));
-                return paren_block;
-            } 
-
-            case TokenType.RightParen: {
-                throw new Error('Unexpected Right Paren');
-            } 
-
-            default: {
-                throw todo(`unexpected (token::${token.type} -> { ${token.value} })`);
-            } 
+            case TokenType.Integer: return this.parse_integer();
+            case TokenType.String: return this.parse_integer();
+            case TokenType.Identifier: return this.parse_identifier();
+            case TokenType.Operator: return this.parse_operator();
+            case TokenType.LeftParen: return this.parse_left_paren();
+            case TokenType.RightParen: return this.parse_right_paren();
+            default: throw todo(`unexpected (token::${token.type} -> { ${token.value} })`);
         }
-        throw new Error('unexpected AST???');
     }
 
     // is
@@ -134,7 +146,7 @@ export class Parser {
         this.body = new BlockNode;
         this.cursor = 0;
         while (this.cursor < this.tokens.length) {
-            this.body.push_node(this.parse_node());
+            this.body.push_node(this.parse_expression());
             this.eat();
         }
         return this.body;
