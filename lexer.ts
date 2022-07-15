@@ -53,14 +53,14 @@ export class Lexer {
     }
     
     private lex_operator(): void {
-        this.tokens.push(new Token(TokenType.Operator, this.location.clone(), this.current_char()));
+        this.tokens.push(new Token(TokenType.Operator, this.location.clone(), this.get_char()));
         this.increment();
     }
 
     private lex_numbers(): void {
         let number = '';
-        while (NUMBERS.includes(this.current_char())) {
-            number += this.current_char();
+        while (NUMBERS.includes(this.get_char())) {
+            number += this.get_char();
             this.increment();
         }
         this.tokens.push(new Token(TokenType.Integer, this.location.clone(), Number(number)));
@@ -75,7 +75,7 @@ export class Lexer {
     }
 
     private lex_parens(): void {
-        const paren = this.current_char();
+        const paren = this.get_char();
         let type: TokenType;
         if (paren == '(') type = TokenType.LeftParen; 
         if (paren == ')') type = TokenType.RightParen; 
@@ -88,12 +88,8 @@ export class Lexer {
     }
 
     // Other
-    private current_char(): string {
-        return this.src[this.location.cursor];
-    }
-
-    private peek(): string {
-        return this.src[this.location.cursor + 1];
+    private get_char(offset = 0): string {
+        return this.src[this.location.cursor + offset];
     }
 
     private increment(): void {
@@ -110,15 +106,15 @@ export class Lexer {
         this.location = new Location(0, 0, 0);
         this.tokens = [];
         while (this.location.cursor < this.src.length) {
-            if ([' '].includes(this.current_char())) { this.lex_space(); }
-            if (NEW_LINE.includes(this.current_char())) { this.lex_newline(); continue; }
-            if (OPERATORS.includes(this.current_char())) { this.lex_operator(); continue; }
-            if (NUMBERS.includes(this.current_char())) { this.lex_numbers(); continue; }
-            if (ALPHABET.includes(this.current_char())) { this.lex_identifier(); continue; }
-            if (STRING_LITERALS.includes(this.current_char())) { this.lex_string(); continue; }
-            if (PARENTHESIS.includes(this.current_char())) { this.lex_parens(); continue; }
-            if (BRACKETS.includes(this.current_char())) { this.lex_brackets(); continue; }
-            todo('implement', this.current_char());
+            if ([' '].includes(this.get_char())) { this.lex_space(); }
+            if (NEW_LINE.includes(this.get_char())) { this.lex_newline(); continue; }
+            if (OPERATORS.includes(this.get_char())) { this.lex_operator(); continue; }
+            if (NUMBERS.includes(this.get_char())) { this.lex_numbers(); continue; }
+            if (ALPHABET.includes(this.get_char())) { this.lex_identifier(); continue; }
+            if (STRING_LITERALS.includes(this.get_char())) { this.lex_string(); continue; }
+            if (PARENTHESIS.includes(this.get_char())) { this.lex_parens(); continue; }
+            if (BRACKETS.includes(this.get_char())) { this.lex_brackets(); continue; }
+            todo('implement', this.get_char());
             this.increment();
         }
         return this.tokens;
