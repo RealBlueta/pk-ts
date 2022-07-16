@@ -1,3 +1,5 @@
+import { todo } from './index.ts';
+
 // Location
 class Location {
     constructor(public cursor: number, public row: number, public col: number) {}
@@ -20,20 +22,14 @@ export class Token {
     public constructor(public type: TokenType, public location: Location, public value?: any) {}
 }
 
-// Todo
-function todo(...args: unknown[]) {
-    console.assert(false, 'Lexer:', ...args);
-    Deno.exit(1);
-}
-
 // Lexums
-const NEW_LINE: string[] = '\n\r'.split('');
-const NUMBERS: string[] = '0123456789'.split('');
-const ALPHABET: string[] = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz_'.split(''); 
-const OPERATORS: string[] = '+-/*%'.split('');
-const STRING_LITERALS: string[] = '\'"'.split('');
-const PARENTHESIS: string[] = '()'.split('');
-const BRACKETS: string[] = '{}[]'.split('');
+export const NEW_LINE: string[] = '\n\r'.split('');
+export const NUMBERS: string[] = '0123456789'.split('');
+export const ALPHABET: string[] = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz_'.split(''); 
+export const OPERATORS: string[] = '+-/*%'.split('');
+export const STRING_LITERALS: string[] = '\'"'.split('');
+export const PARENTHESIS: string[] = '()'.split('');
+export const BRACKETS: string[] = '{}[]'.split('');
 
 // Lexer
 export class Lexer {
@@ -67,11 +63,11 @@ export class Lexer {
     }
 
     private lex_identifier(): void {
-        todo('implemenet identifier');
+        throw todo('implemenet identifier');
     }
 
     private lex_string(): void {
-        todo('implemenet string');
+        throw todo('implemenet string');
     }
 
     private lex_parens(): void {
@@ -84,7 +80,7 @@ export class Lexer {
     }
 
     private lex_brackets(): void {
-        todo('implemenet brackets');
+        throw todo('implemenet brackets');
     }
 
     // Other
@@ -114,8 +110,7 @@ export class Lexer {
             if (STRING_LITERALS.includes(this.get_char())) { this.lex_string(); continue; }
             if (PARENTHESIS.includes(this.get_char())) { this.lex_parens(); continue; }
             if (BRACKETS.includes(this.get_char())) { this.lex_brackets(); continue; }
-            todo('implement', this.get_char());
-            this.increment();
+            throw todo('implement', this.get_char());
         }
         return this.tokens;
     }

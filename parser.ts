@@ -1,4 +1,5 @@
-import { Token, TokenType } from './lexer.ts';
+import { todo } from './index.ts';
+import { OPERATORS, Token, TokenType } from './lexer.ts';
 
 // Nodes
 export class Node {
@@ -22,9 +23,10 @@ export class BlockNode extends Node {
     }
 }
 
+type Operator = '+' | '-' | '/' | '*' | '%';
 export class BinaryNode extends Node {
     private type = 'binary_node';
-    constructor(public lhs: Node, public rhs: Node, public op: string) {
+    constructor(public lhs: Node, public op: Operator, public rhs: Node) {
         super();
     }
 }
@@ -41,12 +43,6 @@ export class GroupedExpressionNode extends Node {
     constructor(public expression?: Node) {
         super();
     }
-}
-
-// Todo
-function todo(...args: unknown[]) {
-    console.assert(false, 'Parser', ...args);
-    Deno.exit(1);
 }
 
 // Parser
@@ -73,16 +69,17 @@ export class Parser {
         const op = this.get_token().value;
         this.eat(); // eat op tok
 
+        if (!(OPERATORS.includes(op))) throw new Error('invalid operator: ' + op);
+
         const lhs = this.body.pop_node();
-        console.log(lhs)
         if (!lhs) {
-            todo('implement left hand operator');
+            throw todo('implement left hand operator');
         }
 
         const rhs = this.parse_expression();
         if (!rhs) throw new Error('invalid binary operation, missing right hand side');
 
-        return new BinaryNode(lhs!, rhs, op);
+        return new BinaryNode(lhs!, op, rhs);
     }
 
     private parse_left_paren(): Node {
@@ -100,7 +97,6 @@ export class Parser {
     }
 
     private parse_right_paren(): Node {
-        console.log(this.body);
         throw new Error('Unexpected Right Paren');
     }
 

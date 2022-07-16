@@ -9,17 +9,17 @@
                     "type": "literal_node",
                     "value": 1
                 },
+                "op": "+",
                 "rhs": {
                     "type": "literal_node",
                     "value": 5
-                },
-                "op": "+"
+                }
             },
+            "op": "/",
             "rhs": {
                 "type": "literal_node",
                 "value": 2
-            },
-            "op": "/"
+            }
         }
     ]
 }
